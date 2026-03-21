@@ -1,6 +1,6 @@
 # psychopy-chronos
 
-Python driver for the [PST Chronos](https://www.pstnet.com/chronos.cfm) response box, with a drop-in PsychoPy keyboard replacement.
+Python driver for the PST Chronos response box, with a drop-in PsychoPy keyboard replacement.
 
 ## Installation
 
@@ -10,7 +10,7 @@ pip install psychopy-chronos
 
 ## Windows driver
 
-Install the USB driver from the `chronos_driver_win/` folder before first use if you never installed E-Prime on your machine.
+If you've never installed E-Prime on your machine, install the USB driver for Chronos from the `chronos_driver_win/` directory.
 
 ## Usage
 
@@ -45,11 +45,11 @@ if key_resp.response_log:
         [getattr(k, 'tDown', '') for k in key_resp.response_log])
 ```
 
+You can find a simple Builder demo in the `examples/` directory.  
+
 ## Hardware timestamps and drift correction
 
-Each press is timestamped by both the host PC (`chronos_pc_time_s`, seconds from experiment start) and the Chronos internal crystal (`chronos_hw_us`, microseconds).
-
-The crystal drifts relative to the PC clock. I measured +68.7ppm on my laptop (1001 presses over 685s, about 47ms of total drift). The drift is linear and correctable offline by regressing `chronos_pc_time_s` onto `chronos_hw_us`:
+Each press is timestamped by both the host PC (`chronos_pc_time_s`, seconds from experiment start) and the Chronos internal crystal (`chronos_hw_us`, microseconds). The crystal drifts relative to the PC clock. I measured +68.7ppm on my laptop (1001 presses over 685s, about 47ms of total drift). The drift is linear and can be corrected offline by regressing `chronos_pc_time_s` onto `chronos_hw_us`:
 
 ```python
 import numpy as np
@@ -57,6 +57,6 @@ slope, intercept = np.polyfit(hw_us_array, pc_time_array, 1)
 corrected_rt = slope * hw_rt_us + intercept
 ```
 
-Drift magnitude will vary across units. The test script used for this measurement is in `test_chronos_timing.py`.
+Drift magnitude might or might not vary across different computers. The test script used for this measurement is in `test_chronos_timing.py`. Feel free to push the buttons few hundred times to test the drift yourself.
 
 `chronos_hw_us` is a 32-bit counter that wraps every 71.6 minutes. Use modulo 2^32 arithmetic for elapsed time calculations across long sessions.
