@@ -1,0 +1,31 @@
+[build-system]
+requires = ["setuptools>=64", "wheel"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "psychopy-chronos"
+version = "0.0.1"
+description = "Driver for the PST Chronos response box"
+readme = "README.md"
+requires-python = ">=3.9"
+license = "MIT"
+keywords = ["psychopy", "chronos", "pst", "response-box", "neuroscience"]
+classifiers = [
+    "Programming Language :: Python :: 3",
+    "Operating System :: OS Independent",
+    "Intended Audience :: Science/Research",
+    "Topic :: Scientific/Engineering",
+]
+dependencies = [
+    "pyusb>=1.2",
+    "libusb>=1.0.27b2",
+]
+
+[project.optional-dependencies]
+psychopy = ["psychopy>=2023.1"]
+
+[project.urls]
+Repository = "https://github.com/Genuster/psychopy-chronos"
+
+[tool.setuptools]
+packages = ["chronos"]

@@ -1,0 +1,137 @@
+;---------------------------------------------------------------------------------
+;Note: When the driver package is signed, any modifications to this .inf file will
+;break the signature, and the driver package will need to be re-signed.
+;---------------------------------------------------------------------------------
+; Windows Custom/Vendor Class WinUSB Setup File
+; Copyright (C) 2012 Microchip Technology Inc.
+;---------------------------------------------------------------------------------
+; This .inf file is a modified version of the example INF provided
+; in the Microsoft document:
+; "How to Use WinUSB to Communicate with a USB Device"
+;---------------------------------------------------------------------------------
+; Copyright (C) 2013 Psychology Software Tools Inc.
+; This .inf file is a modified version of the one included in the 
+; WinUSB Generic Driver Demo in the Microchip Solutions
+;---------------------------------------------------------------------------------
+
+[Version]
+Signature = "$Windows NT$"
+Class = ResearchDevice
+ClassGuid= {AC62C2BB-ED7C-4ED7-878E-C9A66AC6B1E3}
+Provider = %MFGNAME%
+DriverVer=10/12/2010,1.0.0.3
+CatalogFile=Chronos.cat	;CAT file used when obtaining a WHQL signature on the driver package
+					;Otherwise isn't needed.
+;------------------------------------------------------------------------------
+; ========== Manufacturer/Models sections ===========
+;------------------------------------------------------------------------------
+[Manufacturer]
+%MFGNAME% = Chronos_WinUSB,NTx86,NTamd64
+
+;------------------------------------------------------------------------------
+;  Vendor and Product ID Definitions
+;------------------------------------------------------------------------------
+; When developing your custom USB device, the VID and PID used in the PC side
+; application program and the firmware on the microcontroller must match.
+; Modify the below lines to use your VID and PID.  Use the format as shown below.
+; Note: One INF file can be used for multiple devices with different VID and PIDs.
+; For each supported device, append ",USB\VID_xxxx&PID_yyyy" to the end of the line.
+; There is a maximum number of devices that can be supported per line however.
+; If you append a large number of VID/PIDs to the end of the line, and get a:
+; "The data area passed to a system call is too small." error when trying to install
+; the INF, try removing some of the VIDs/PIDs.
+;------------------------------------------------------------------------------
+[Chronos_WinUSB.NTx86]
+%DESCRIPTION% =USB_Install, USB\VID_2266&PID_0007
+%DESCRIPTION% =USB_Install, USB\VID_2266&PID_0008&MI_00
+
+[Chronos_WinUSB.NTamd64]
+%DESCRIPTION% =USB_Install, USB\VID_2266&PID_0007
+%DESCRIPTION% =USB_Install, USB\VID_2266&PID_0008&MI_00
+
+
+;=========================================================================================
+;ClassInstall32 and ClassInstall_AddReg sections used to make new device manager category.
+;=========================================================================================
+[ClassInstall32]
+AddReg=ClassInstall_AddReg
+
+[ClassInstall_AddReg]
+HKR,,,,%DEVICEMANAGERCATEGORY%
+HKR,,Icon,,"-20"
+
+
+; =================== Installation ===================
+
+[USB_Install]
+Include=winusb.inf
+Needs=WINUSB.NT
+
+[USB_Install.Services]
+Include=winusb.inf
+AddService=WinUSB,0x00000002,WinUSB_ServiceInstall
+
+[WinUSB_ServiceInstall]
+DisplayName     = %WinUSB_SvcDesc%
+ServiceType     = 1
+StartType       = 3
+ErrorControl    = 1
+ServiceBinary   = %12%\WinUSB.sys
+
+[USB_Install.Wdf]
+KmdfService=WINUSB, WinUsb_Install
+
+[WinUSB_Install]
+KmdfLibraryVersion=1.9
+
+[USB_Install.HW]
+AddReg=Dev_AddReg
+
+;------------------------------------------------------------------------------
+;When editing the GUID (the big hex number with dashes inside the squiggly 
+;braces), make sure to write the intended PC application to use the same GUID.
+;Otherwise the application won't be able to find the USB device properly.
+;The GUID is intended to be a "Globablly Unique Identifier".  When making a new
+;product, the VID, PID, and GUID should be updated, to avoid potential conflicts
+;with any existing products.
+;------------------------------------------------------------------------------
+[Dev_AddReg]
+HKR,,DeviceInterfaceGUIDs,0x10000,"{7FCDC4E8-8B7E-4ecf-AC43-59F19EA1511C}"
+
+[USB_Install.CoInstallers]
+AddReg=CoInstallers_AddReg
+CopyFiles=CoInstallers_CopyFiles
+
+[CoInstallers_AddReg]
+HKR,,CoInstallers32,0x00010000,"WdfCoInstaller01009.dll,WdfCoInstaller","WinUSBCoInstaller2.dll"
+
+[CoInstallers_CopyFiles]
+WinUSBCoInstaller2.dll
+WdfCoInstaller01009.dll
+
+[DestinationDirs]
+CoInstallers_CopyFiles=11
+
+; ================= Source Media Section =====================
+
+[SourceDisksNames]
+1 = %DISK_NAME%,,,\i386
+2 = %DISK_NAME%,,,\amd64
+
+[SourceDisksFiles.x86]
+WinUSBCoInstaller2.dll=1
+WdfCoInstaller01009.dll=1
+
+[SourceDisksFiles.amd64]
+WinUSBCoInstaller2.dll=2
+WdfCoInstaller01009.dll=2
+
+; =================== Strings ===================
+
+[Strings]
+MFGNAME="Psychology Software Tools, Inc."
+DESCRIPTION="Chronos E-Prime"
+WinUSB_SvcDesc="WinUSB Device"
+DISK_NAME="Chronos Install Disk"
+DEVICEMANAGERCATEGORY="Research devices"
+
