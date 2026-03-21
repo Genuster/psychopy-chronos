@@ -22,7 +22,7 @@ dependencies = [
 ]
 
 [project.optional-dependencies]
-psychopy = ["psychopy>=2023.1"]
+psychopy = ["psychopy"]
 
 [project.urls]
 Repository = "https://github.com/Genuster/psychopy-chronos"
