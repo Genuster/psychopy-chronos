@@ -17,29 +17,18 @@ If you've never installed E-Prime on your machine, install the USB driver for Ch
 ### Standalone
 
 ```python
+import time
 from chronos import Chronos
 
 with Chronos() as box:
-    events = box.get_events()
+    time.sleep(5)    
+    for evt in box.get_events():
+        print(f"Button: {evt.button}, Press: {evt.is_press}, Hardware timestamp (μs): {evt.hw_timestamp_us}")
 ```
 
-### Led control
-Use `ChronosLEDs` to manipulate the five onboard lights.
-```
-from chronos import ChronosLEDs
-
-with ChronosLEDs() as box:
-    box.init_leds()
-    # light leftmost, centre, and rightmost leds in red for 1.5 seconds
-    box.set_leds(colors=(255, 0, 0), duration=1.5, leds=(0, 2, 4))
-    
-    # or leave them on without blocking code execution
-    box.leds_on(colors=[(255,0,0), (0,255,0)], leds=(0, 1))
-    box.leds_off()
-```
 
 ### AUX inputs
-Chronos comes with AUX cable for digital inputs and outputs. For example, you could send TTL trigger from your PC into chronos at stimulus onset to obtain its chronos hardware timestamp. Comparing this with chronos timestamp of the button press gives you jitter-free RTs.
+Chronos comes with AUX cable for digital inputs and outputs. You could, for example, send TTL trigger from your PC into Chronos at stimulus onset to obtain Chronos hardware timestamp. Comparing this with chronos timestamp of the button press gives you jitter-free RTs.
 
 ```python
 import time
@@ -60,6 +49,22 @@ with Chronos() as box:
 ```
 Two digital inputs channels are coded as 'F' and 'G' following PST pinout.
 
+
+### Led control
+Use `ChronosLEDs` to manipulate the five onboard lights.
+
+```python
+from chronos import ChronosLEDs
+
+with ChronosLEDs() as box:
+    box.init_leds()
+    # light leftmost, centre, and rightmost leds in red for 1.5 seconds
+    box.set_leds(colors=(255, 0, 0), duration=1.5, leds=(0, 2, 4))
+    
+    # or leave them on without blocking code execution
+    box.leds_on(colors=[(255,0,0), (0,255,0)], leds=(0, 1))
+    box.leds_off()
+```
 
 ### PsychoPy Builder
 
