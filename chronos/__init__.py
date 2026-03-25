@@ -1,4 +1,4 @@
-from .chronos import Chronos, ButtonEvent, BUTTON_MAP
+from .chronos import Chronos, ChronosLEDs, ChronosEvent, ButtonEvent, AuxEvent, BUTTON_MAP
 from .chronos_keyboard import HybridKeyboard
 
-__all__ = ["Chronos", "ButtonEvent", "BUTTON_MAP", "HybridKeyboard"]
+__all__ = ["Chronos", "ChronosLEDs", "ChronosEvent", "ButtonEvent", "AuxEvent", "BUTTON_MAP", "HybridKeyboard"]

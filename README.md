@@ -23,6 +23,44 @@ with Chronos() as box:
     events = box.get_events()
 ```
 
+### Led control
+Use `ChronosLEDs` to manipulate the five onboard lights.
+```
+from chronos import ChronosLEDs
+
+with ChronosLEDs() as box:
+    box.init_leds()
+    # light leftmost, centre, and rightmost leds in red for 1.5 seconds
+    box.set_leds(colors=(255, 0, 0), duration=1.5, leds=(0, 2, 4))
+    
+    # or leave them on without blocking code execution
+    box.leds_on(colors=[(255,0,0), (0,255,0)], leds=(0, 1))
+    box.leds_off()
+```
+
+### AUX inputs
+Chronos comes with AUX cable for digital inputs and outputs. For example, you could send TTL trigger from your PC into chronos at stimulus onset to obtain its chronos hardware timestamp. Comparing this with chronos timestamp of the button press gives you jitter-free RTs.
+
+```python
+import time
+from chronos import Chronos
+
+with Chronos() as box:
+    while True:
+        # send TTL trigger via for example psychopy.parallel 
+        for e in box.get_aux_events():
+            if e.is_rising: # trigger onset
+                stim_onset_us = e.hw_timestamp_us
+
+        for e in box.get_events():
+            if e.is_press and stim_onset_us:
+                print((e.hw_timestamp_us - stim_onset_us) / 1000.0)
+                exit()
+        time.sleep(0.001)
+```
+Two digital inputs channels are coded as 'F' and 'G' following PST pinout.
+
+
 ### PsychoPy Builder
 
 Add a **Code Component** with this in the *Before Experiment* tab:
@@ -57,6 +95,6 @@ slope, intercept = np.polyfit(hw_us_array, pc_time_array, 1)
 corrected_rt = slope * hw_rt_us + intercept
 ```
 
-Drift magnitude might or might not vary across different computers. The test script used for this measurement is in `test_chronos_timing.py`. Feel free to push the buttons few hundred times to test the drift yourself.
+Drift magnitude will vary across different computers. The test script used for this measurement is in `test_chronos_timing.py`. Feel free to push the buttons few hundred times to test the drift yourself.
 
 `chronos_hw_us` is a 32-bit counter that wraps every 71.6 minutes. Use modulo 2^32 arithmetic for elapsed time calculations across long sessions.

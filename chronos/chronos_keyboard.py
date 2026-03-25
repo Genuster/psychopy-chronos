@@ -2,7 +2,7 @@
 
 Wraps the framework-agnostic ``chronos.Chronos`` driver into a
 drop-in replacement for ``psychopy.hardware.keyboard.Keyboard``,
-merging Chronos button events with regular keyboard events.
+merging Chronos button and AUX input events with regular keyboard events.
 
 Timing:
     - ``rt``             : seconds from last ``clock.reset()`` to press
@@ -26,7 +26,7 @@ from psychopy.hardware import keyboard
 # HybridKeyboard.start() uses this so it never accidentally instantiates itself.
 _OriginalKeyboard = keyboard.Keyboard
 
-from .chronos import Chronos
+from .chronos import ChronosLEDs
 
 
 # ---------------------------------------------------------------------------
@@ -60,7 +60,7 @@ class _ChronosKeyShim:
 
 
 # ---------------------------------------------------------------------------
-# HybridKeyboard — drop-in replacement for keyboard.Keyboard
+# HybridKeyboard: drop-in replacement for keyboard.Keyboard
 # ---------------------------------------------------------------------------
 
 class HybridKeyboard:
@@ -114,7 +114,7 @@ class HybridKeyboard:
 
         # Inner objects (created in start())
         self._kb: Optional[keyboard.Keyboard] = None
-        self._chronos: Optional[Chronos] = None
+        self._chronos: Optional[ChronosLEDs] = None
         self._started = False
 
         # Press/release pairing for Chronos events (mirrors PsychoPy's _keysStillDown)
@@ -147,11 +147,11 @@ class HybridKeyboard:
 
         self._kb = _OriginalKeyboard(**self._kb_params)
 
-        # Use psychopy.clock.getTime — the platform's absolute high-resolution
+        # Use psychopy.clock.getTime, the platform's absolute high-resolution
         # counter (QPC / PTB / mach_absolute_time).  This is the same domain as
         # clock.getLastResetTime(), so rt and tDown calculations have no unit
         # mismatch and are immune to clock.reset() calls between press and poll.
-        self._chronos = Chronos(clock=psychopy.clock.getTime)
+        self._chronos = ChronosLEDs(clock=psychopy.clock.getTime)
 
         if self._chronos.connected:
             self._chronos.start()
@@ -202,7 +202,7 @@ class HybridKeyboard:
                 self._chronos_events.append(shim)
                 self._chronos_still_down.append(shim)
             else:
-                # Release — find the matching press and set its duration.
+                # Release: find the matching press and set its duration.
                 # Formula mirrors PsychoPy's PTB parseMessage exactly:
                 #   duration = release_abs - press_abs
                 #            = evt.timestamp - (tDown + defaultClock.getLastResetTime())
@@ -262,9 +262,22 @@ class HybridKeyboard:
         """Return the current pressed/unpressed state of one or more keys.
 
         Parameters match ``psychopy.hardware.keyboard.Keyboard.getState()``.
-        Chronos buttons are not included; only the native keyboard is queried.
+        Chronos buttons and AUX inputs are not included; only the native
+        keyboard is queried.
         """
         return self._kb.getState(keys)
+
+    def get_aux_events(self):
+        """Return and clear all AUX input transitions since last call.
+
+        Returns a list of ``AuxEvent`` objects, each with ``channel``
+        ('F' or 'G'), ``is_rising``, ``hw_timestamp_us``, and ``timestamp``.
+        Simultaneous F+G transitions produce two events sharing the same
+        ``hw_timestamp_us``.
+        """
+        if self._chronos is None:
+            return []
+        return self._chronos.get_aux_events()
 
     def clearEvents(self, eventType=None):
         """Clear events from both the keyboard and Chronos."""
