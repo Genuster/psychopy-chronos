@@ -57,7 +57,6 @@ from .chronos_constants import (
     READ_SIZE,
     TIMEOUT_MS,
     _OFF_TS,
-    _OFF_STATE,
     _OFF_BUTTON_LEVEL,
     _OFF_BUTTON_CHANGED,
     _OFF_TS_2,

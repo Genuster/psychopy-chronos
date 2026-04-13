@@ -12,14 +12,14 @@ TIMEOUT_MS = 10  # read timeout before retry (ms)
 
 # --- Byte offsets inside a single 10-byte button event slot ---
 _OFF_TS = 2  # 4-byte big-endian µs timestamp
-_OFF_STATE = 7  # button state bitmask (held buttons)
-_OFF_EVENT = 9  # button event bitmask (changed buttons)
+_OFF_BUTTON_LEVEL = 7    # button state bitmask: set while held, clear on release
+_OFF_BUTTON_CHANGED = 9  # button event bitmask: bits that changed this packet
 
 # --- Second event slot starts at byte 11 ---
 _SLOT2_BASE = 11  # each packet can carry two 10-byte event slots
-_OFF_TS_2 = _SLOT2_BASE + 2  # bytes 13-16
-_OFF_STATE_2 = _SLOT2_BASE + 6  # byte 17
-_OFF_EVENT_2 = _SLOT2_BASE + 8  # byte 19
+_OFF_TS_2 = _SLOT2_BASE + 2             # bytes 13-16
+_OFF_BUTTON_LEVEL_2 = _SLOT2_BASE + 6   # byte 17
+_OFF_BUTTON_CHANGED_2 = _SLOT2_BASE + 8 # byte 19
 
 # --- Byte offsets for AUX inputs inside a single 10-byte event slot ---
 # Physical buttons use bytes 7/9 (state/event); AUX inputs use bytes 6/8.
