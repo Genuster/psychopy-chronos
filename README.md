@@ -22,7 +22,7 @@ from chronos import Chronos
 
 with Chronos() as box:
     time.sleep(5)    
-    for evt in box.get_events():
+    for evt in box.get_button_events():
         print(f"Button: {evt.button}, Press: {evt.is_press}, Hardware timestamp (μs): {evt.hw_timestamp_us}")
 ```
 
@@ -41,7 +41,7 @@ with Chronos() as box:
             if e.is_rising: # trigger onset
                 stim_onset_us = e.hw_timestamp_us
 
-        for e in box.get_events():
+        for e in box.get_button_events():
             if e.is_press and stim_onset_us:
                 print((e.hw_timestamp_us - stim_onset_us) / 1000.0)
                 exit()

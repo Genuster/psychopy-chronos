@@ -119,7 +119,7 @@ class HybridKeyboard:
 
         # Press/release pairing for Chronos events (mirrors PsychoPy's _keysStillDown)
         self._chronos_still_down: deque[_ChronosKeyShim] = deque()
-        self._chronos_events: deque[_ChronosKeyShim] = deque()
+        self._chronos_button_events: deque[_ChronosKeyShim] = deque()
 
         # Accumulates every KeyPress/ChronosKeyShim returned by getKeys() during
         # the current trial.  Reset by clearEvents() so Builder's "discard previous"
@@ -180,9 +180,9 @@ class HybridKeyboard:
 
     # --- Chronos event processing -------------------------------------------
 
-    def _process_chronos_events(self):
+    def _process_chronos_button_events(self):
         """Drain the Chronos driver queue and pair presses with releases."""
-        for evt in self._chronos.get_events():
+        for evt in self._chronos.get_button_events():
             if evt.is_press:
                 # evt.timestamp is absolute (core.getTime frame).
                 # rt  = time from last trial-clock reset to press.
@@ -199,7 +199,7 @@ class HybridKeyboard:
                     code=evt.button,
                     hw_timestamp_us=evt.hw_timestamp_us,
                 )
-                self._chronos_events.append(shim)
+                self._chronos_button_events.append(shim)
                 self._chronos_still_down.append(shim)
             else:
                 # Release: find the matching press and set its duration.
@@ -232,9 +232,9 @@ class HybridKeyboard:
         ))
 
         # Chronos keys
-        self._process_chronos_events()
+        self._process_chronos_button_events()
         to_return = []
-        for shim in self._chronos_events:
+        for shim in self._chronos_button_events:
             # Match PsychoPy semantics exactly:
             #   waitRelease=True  → only return events that have been released
             #   waitRelease=False → return all press events, released or not
@@ -251,7 +251,7 @@ class HybridKeyboard:
 
         if clear:
             for shim in to_return:
-                self._chronos_events.remove(shim)
+                self._chronos_button_events.remove(shim)
 
         keys.extend(to_return)
         keys.sort(key=lambda k: k.rt if k.rt is not None else 0)
@@ -284,7 +284,7 @@ class HybridKeyboard:
         self._kb.clearEvents(eventType=eventType)
         if self._chronos is not None:
             self._chronos.clear()
-        self._chronos_events.clear()
+        self._chronos_button_events.clear()
         self._chronos_still_down.clear()
         self.response_log.clear()
 

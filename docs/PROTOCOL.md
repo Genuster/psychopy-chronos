@@ -64,8 +64,8 @@ Bytes 11–19: second event slot (same layout, offset by 10)
 | 6+7 | `0xC0` | F+G simultaneous | Pins 6+7 | Both |
 
 **Press vs release (physical buttons):**
-- Press: bit set in **both** STATE (byte 7) and EVENT (byte 9).
-- Release: bit set in EVENT only; STATE bit cleared.
+- Press: bit set in **both** LEVEL (byte 7) and CHANGED (byte 9).
+- Release: bit **0** in LEVEL (byte 7), but **1** in CHANGED (byte 9).
 
 **Rise vs fall (AUX inputs):**
 - Rising edge: bit set in **both** level (byte 6) and changed (byte 8).

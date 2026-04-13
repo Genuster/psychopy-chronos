@@ -17,19 +17,19 @@ c.init_leds()
 print(f"Firmware descriptor: {c.firmware_descriptor.hex()}")
 print(f"Calibration: {c.calibration}")
 
-print("All LEDs red for 1 s...")
+print("All LEDs red for 1s")
 c.set_leds(colors=(255, 0, 0), duration=1.0)
 
-print("All LEDs green for 1 s...")
+print("All LEDs green for 1s")
 c.set_leds(colors=(0, 255, 0), duration=1.0)
 
-print("All LEDs blue for 1 s...")
+print("All LEDs blue for 1s")
 c.set_leds(colors=(0, 0, 255), duration=1.0)
 
-print("Only LED 0 (leftmost) white for 2 s...")
+print("Only LED 0 (leftmost) white for 2s")
 c.set_leds(colors=(255, 255, 255), duration=1.0, leds=(0,))
 
-print("Only LED 4 (rightmost) dim white for 2 s...")
+print("Only LED 4 (rightmost) dim white for 2s")
 c.set_leds(colors=(10, 10, 10), duration=1.0, leds=(4,))
 
 FALLOFF = 3.0  # Gaussian width (higher = narrower beam)
@@ -45,7 +45,7 @@ def wave_frame(peak, hue):
     ]
 
 
-print("Rainbow wave left↔right, 3 passes...")
+print("Rainbow wave left to right and back, 3 passes")
 hue = 0.0
 for _ in range(5):
     for start, end, sign in [(0.0, 4.0, 1), (4.0, 0.0, -1)]:

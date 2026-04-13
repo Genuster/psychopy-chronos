@@ -58,10 +58,11 @@ from .chronos_constants import (
     TIMEOUT_MS,
     _OFF_TS,
     _OFF_STATE,
-    _OFF_EVENT,
+    _OFF_BUTTON_LEVEL,
+    _OFF_BUTTON_CHANGED,
     _OFF_TS_2,
-    _OFF_STATE_2,
-    _OFF_EVENT_2,
+    _OFF_BUTTON_LEVEL_2,
+    _OFF_BUTTON_CHANGED_2,
     BUTTON_MAP,
     AUX_MAP,
     _OFF_AUX_LEVEL,
@@ -145,7 +146,7 @@ class Chronos:
 
     def __init__(self, clock: Optional[Callable[[], float]] = None):
         self._clock = clock or time.perf_counter
-        self._events: deque[ButtonEvent] = deque()
+        self._button_events: deque[ButtonEvent] = deque()
         self._aux_events: deque[AuxEvent] = deque()
         self._lock = threading.Lock()
         self._running = False
@@ -199,13 +200,13 @@ class Chronos:
 
     # --- event access ---
 
-    def get_events(self) -> list[ButtonEvent]:
+    def get_button_events(self) -> list[ButtonEvent]:
         """Return and clear all queued button events."""
         if not self.connected:
             return []
         with self._lock:
-            evts = list(self._events)
-            self._events.clear()
+            evts = list(self._button_events)
+            self._button_events.clear()
         return evts
 
     def get_aux_events(self) -> list[AuxEvent]:
@@ -222,7 +223,7 @@ class Chronos:
         if not self.connected:
             return
         with self._lock:
-            self._events.clear()
+            self._button_events.clear()
             self._aux_events.clear()
 
     # --- internals ---
@@ -237,21 +238,21 @@ class Chronos:
         data: bytes,
         ts: float,
         ts_offset: int,
-        state_offset: int,
-        event_offset: int,
+        level_offset: int,
+        changed_offset: int,
     ) -> None:
         """Parse one button event slot and enqueue any button events."""
-        state_mask = data[state_offset]
-        event_mask = data[event_offset]
+        level_mask = data[level_offset]
+        changed_mask = data[changed_offset]
 
-        if event_mask == 0:
+        if changed_mask == 0:
             return
 
         hw_ts = self._parse_hw_timestamp(data, ts_offset)
 
         for bit_val, key_name in BUTTON_MAP:
-            if event_mask & bit_val:
-                is_press = bool(state_mask & bit_val)
+            if changed_mask & bit_val:
+                is_press = bool(level_mask & bit_val)
                 evt = ButtonEvent(
                     button=key_name,
                     timestamp=ts,
@@ -259,7 +260,7 @@ class Chronos:
                     is_press=is_press,
                 )
                 with self._lock:
-                    self._events.append(evt)
+                    self._button_events.append(evt)
 
     def _parse_aux_slot(
         self,
@@ -302,14 +303,14 @@ class Chronos:
                     self._parse_button_slot(
                         data, ts,
                         ts_offset=_OFF_TS,
-                        state_offset=_OFF_STATE,
-                        event_offset=_OFF_EVENT,
+                        level_offset=_OFF_BUTTON_LEVEL,
+                        changed_offset=_OFF_BUTTON_CHANGED,
                     )
                     self._parse_button_slot(
                         data, ts,
                         ts_offset=_OFF_TS_2,
-                        state_offset=_OFF_STATE_2,
-                        event_offset=_OFF_EVENT_2,
+                        level_offset=_OFF_BUTTON_LEVEL_2,
+                        changed_offset=_OFF_BUTTON_CHANGED_2,
                     )
                     # AUX inputs: slot 1 (bytes 6/8) and slot 2 (bytes 16/18)
                     self._parse_aux_slot(

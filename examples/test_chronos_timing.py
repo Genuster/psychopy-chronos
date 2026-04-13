@@ -39,7 +39,7 @@ ppm = 0.0
 
 try:
     while True:
-        events = chronos.get_events()
+        events = chronos.get_button_events()
         for evt in events:
             if not evt.is_press:
                 continue
